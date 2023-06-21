@@ -5,6 +5,7 @@
 
 ### How to run
 - Clone this repo and cd to miniapp folder. 
+- Copy in backend folder `.env.example` to `.env` and change the value of `GOOGLE_API_KEY` to your own key.
 - Run `docker-compose up -d` to start the app.
 - Run `docker-compose down` to stop the app.
 - Run `docker-compose logs -f` to see the logs.
