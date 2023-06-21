@@ -1,0 +1,78 @@
+version: '3.8'
+
+networks:
+  miniapp:
+    driver: bridge
+
+services:
+  nginx:
+    image: nginx:stable-alpine
+    container_name: miniapp-nginx
+    ports:
+      - "8002:8002"
+      - "8001:8001"
+    depends_on:
+      - php
+    networks:
+      - miniapp
+    volumes:
+      - ./backend:/app
+      - ./frontend:/frontend
+      - ./docker/nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf
+      - ./docker/nginx/logs:/var/log/nginx
+
+  postgres:
+    image: postgres:14-alpine3.15
+    container_name: miniapp-postgres
+    hostname: miniapp-postgres
+    ports:
+      - "5439:5432"
+    restart: unless-stopped
+    tty: true
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: trust
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_DATABASE}
+      DB_DATABASE_TESTING: ${DB_DATABASE_TESTING}
+    volumes:
+      - ./docker/postgres/pg-data:/var/lib/postgresql/data
+      - ./docker/postgres:/docker-entrypoint-initdb.d
+    networks:
+      - miniapp
+
+  php:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: miniapp-php
+    env_file:
+      - ./backend/.env
+    environment:
+      DATABASE_URL: ${DB_CONNECTION}://${DB_USERNAME}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_DATABASE}
+    volumes:
+      - ./backend:/app
+    networks:
+      - miniapp
+
+  frontend:
+    image: node:16.15-alpine
+    container_name: miniapp-frontend
+    working_dir: /frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/frontend
+      - ./docker/node/entrypoint.sh:/docker-entrypoint.sh
+    networks:
+      - miniapp
+    command: >
+      sh -c "npm run start"
+# for debug and istall dependencies
+#     tail -f /dev/null
+#     sh -c "npm install && npm run build"
+
+volumes:
+  pg-data:
+    driver: local
+
