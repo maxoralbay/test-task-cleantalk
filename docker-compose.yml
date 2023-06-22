@@ -1,4 +1,4 @@
-version: '3.8'
+version: '3.3'
 
 networks:
   miniapp:
@@ -29,6 +29,8 @@ services:
       - "5439:5432"
     restart: unless-stopped
     tty: true
+    env_file:
+      - ./backend/.env
     environment:
       POSTGRES_HOST_AUTH_METHOD: trust
       POSTGRES_USER: ${DB_USERNAME}
@@ -67,12 +69,8 @@ services:
     networks:
       - miniapp
     command: >
-      sh -c "npm run start"
-# for debug and istall dependencies
-#     tail -f /dev/null
-#     sh -c "npm install && npm run build"
+      sh -c "npm install && npm run build && npm run start"
 
 volumes:
   pg-data:
     driver: local
-
