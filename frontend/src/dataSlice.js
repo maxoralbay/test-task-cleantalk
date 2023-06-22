@@ -1,6 +1,6 @@
 // dataSlice.js
 import {createSlice, createAsyncThunk, nanoid} from '@reduxjs/toolkit';
-const BASE_URL = 'http://0.0.0.0:8002/api';
+const BASE_URL = 'http://173.249.58.209:8002/api';
 // Create a data object with the payload for the POST request
 export const setCalcTriangulate = createAsyncThunk(
     'data/setCalcTriangulate',
